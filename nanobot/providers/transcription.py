@@ -1,35 +1,40 @@
-"""Voice transcription provider using Groq."""
+"""Voice transcription providers."""
 
 import os
 from pathlib import Path
+from typing import Protocol
 
 import httpx
 from loguru import logger
 
 
-class GroqTranscriptionProvider:
-    """
-    Voice transcription provider using Groq's Whisper API.
+class TranscriptionProvider(Protocol):
+    """Interface for transcription providers."""
 
-    Groq offers extremely fast transcription with a generous free tier.
+    async def transcribe(self, file_path: str | Path) -> str: ...
+
+
+class OpenAITranscriptionProvider:
+    """
+    Voice transcription provider using OpenAI's Whisper API.
     """
 
-    def __init__(self, api_key: str | None = None):
-        self.api_key = api_key or os.environ.get("GROQ_API_KEY")
-        self.api_url = "https://api.groq.com/openai/v1/audio/transcriptions"
+    def __init__(
+        self,
+        api_key: str | None = None,
+        api_base: str | None = None,
+        model: str = "gpt-4o-transcribe",
+    ):
+        self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
+        self.api_url = f"{api_base or 'https://api.openai.com/v1'}/audio/transcriptions"
+        self.model = model
 
     async def transcribe(self, file_path: str | Path) -> str:
         """
-        Transcribe an audio file using Groq.
-
-        Args:
-            file_path: Path to the audio file.
-
-        Returns:
-            Transcribed text.
+        Transcribe an audio file using OpenAI.
         """
         if not self.api_key:
-            logger.warning("Groq API key not configured for transcription")
+            logger.warning("OpenAI API key not configured for transcription")
             return ""
 
         path = Path(file_path)
@@ -42,7 +47,7 @@ class GroqTranscriptionProvider:
                 with open(path, "rb") as f:
                     files = {
                         "file": (path.name, f),
-                        "model": (None, "whisper-large-v3"),
+                        "model": (None, self.model),
                     }
                     headers = {
                         "Authorization": f"Bearer {self.api_key}",
@@ -57,5 +62,5 @@ class GroqTranscriptionProvider:
                     return data.get("text", "")
 
         except Exception as e:
-            logger.error(f"Groq transcription error: {e}")
+            logger.error(f"OpenAI transcription error: {e}")
             return ""
