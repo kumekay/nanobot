@@ -51,6 +51,8 @@ class AgentLoop:
         restrict_to_workspace: bool = False,
         session_manager: SessionManager | None = None,
     ):
+        from nanobot.config.schema import ExecToolConfig
+
         self.bus = bus
         self.provider = provider
         self.workspace = workspace
