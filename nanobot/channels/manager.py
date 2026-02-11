@@ -48,6 +48,8 @@ class ChannelManager:
                     self.config.channels.telegram,
                     self.bus,
                     groq_api_key=self.config.providers.groq.api_key,
+                    openai_api_key=self.config.providers.openai.api_key,
+                    openai_api_base=self.config.providers.openai.api_base,
                     session_manager=self.session_manager,
                 )
                 logger.info("Telegram channel enabled")
