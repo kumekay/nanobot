@@ -103,11 +103,15 @@ class TelegramChannel(BaseChannel):
         config: TelegramConfig,
         bus: MessageBus,
         groq_api_key: str = "",
+        openai_api_key: str = "",
+        openai_api_base: str | None = None,
         session_manager: SessionManager | None = None,
     ):
         super().__init__(config, bus)
         self.config: TelegramConfig = config
         self.groq_api_key = groq_api_key
+        self.openai_api_key = openai_api_key
+        self.openai_api_base = openai_api_base
         self.session_manager = session_manager
         self._app: Application | None = None
         self._chat_ids: dict[str, int] = {}  # Map sender_id to chat_id for replies
@@ -323,9 +327,20 @@ class TelegramChannel(BaseChannel):
                 
                 # Handle voice transcription
                 if media_type == "voice" or media_type == "audio":
-                    from nanobot.providers.transcription import GroqTranscriptionProvider
-                    transcriber = GroqTranscriptionProvider(api_key=self.groq_api_key)
-                    transcription = await transcriber.transcribe(file_path)
+                    from nanobot.providers.transcription import GroqTranscriptionProvider, OpenAITranscriptionProvider
+                    
+                    transcription = ""
+                    if self.groq_api_key:
+                        transcriber = GroqTranscriptionProvider(api_key=self.groq_api_key)
+                        transcription = await transcriber.transcribe(file_path)
+                    
+                    if not transcription and self.openai_api_key:
+                        transcriber = OpenAITranscriptionProvider(
+                            api_key=self.openai_api_key, 
+                            api_base=self.openai_api_base
+                        )
+                        transcription = await transcriber.transcribe(file_path)
+
                     if transcription:
                         logger.info(f"Transcribed {media_type}: {transcription[:50]}...")
                         content_parts.append(f"[transcription: {transcription}]")
