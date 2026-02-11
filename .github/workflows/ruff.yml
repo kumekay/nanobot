@@ -1,4 +1,4 @@
-name: Lint with Ruff
+name: Pre-commit checks
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 jobs:
-  lint:
+  pre-commit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,11 +17,5 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Install ruff
-        run: pip install ruff
-      
-      - name: Run ruff check
-        run: ruff check .
-      
-      - name: Run ruff format check
-        run: ruff format --check .
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
