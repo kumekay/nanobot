@@ -104,8 +104,8 @@ class WebFetchTool(Tool):
         "type": "object",
         "properties": {
             "url": {"type": "string", "description": "URL to fetch"},
-            "extractMode": {"type": "string", "enum": ["markdown", "text"], "default": "markdown"},
-            "maxChars": {"type": "integer", "minimum": 100},
+            "extract_mode": {"type": "string", "enum": ["markdown", "text"], "default": "markdown"},
+            "max_chars": {"type": "integer", "minimum": 100},
         },
         "required": ["url"],
     }
