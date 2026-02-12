@@ -1,6 +1,7 @@
 ---
 name: skill-creator
-description: Create or update AgentSkills. Use when designing, structuring, or packaging skills with scripts, references, and assets.
+description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends the agent's capabilities with specialized knowledge, workflows, or tool integrations.
+license: Based on https://github.com/anthropics/skills. Complete terms in LICENSE.txt
 ---
 
 # Skill Creator
@@ -52,7 +53,8 @@ skill-name/
 ├── SKILL.md (required)
 │   ├── YAML frontmatter metadata (required)
 │   │   ├── name: (required)
-│   │   └── description: (required)
+│   │   ├── description: (required)
+│   │   └── compatibility: (optional, rarely needed)
 │   └── Markdown instructions (required)
 └── Bundled Resources (optional)
     ├── scripts/          - Executable code (Python/Bash/etc.)
@@ -64,7 +66,7 @@ skill-name/
 
 Every SKILL.md consists of:
 
-- **Frontmatter** (YAML): Contains `name` and `description` fields. These are the only fields that the agent reads to determine when the skill gets used, thus it is very important to be clear and comprehensive in describing what the skill is, and when it should be used.
+- **Frontmatter** (YAML): Contains `name` and `description` fields (required), plus optional fields like `license`, `metadata`, and `compatibility`. Only `name` and `description` are read by the agent to determine when the skill triggers, so be clear and comprehensive about what the skill is and when it should be used. The `compatibility` field is for noting environment requirements (target product, system packages, etc.) but most skills don't need it.
 - **Body** (Markdown): Instructions and guidance for using the skill. Only loaded AFTER the skill triggers (if at all).
 
 #### Bundled Resources (optional)
@@ -211,14 +213,6 @@ Skill creation involves these steps:
 
 Follow these steps in order, skipping only if there is a clear reason why they are not applicable.
 
-### Skill Naming
-
-- Use lowercase letters, digits, and hyphens only; normalize user-provided titles to hyphen-case (e.g., "Plan Mode" -> `plan-mode`).
-- When generating names, generate a name under 64 characters (letters, digits, hyphens).
-- Prefer short, verb-led phrases that describe the action.
-- Namespace by tool when it improves clarity or triggering (e.g., `gh-address-comments`, `linear-address-issue`).
-- Name the skill folder exactly after the skill name.
-
 ### Step 1: Understanding the Skill with Concrete Examples
 
 Skip this step only when the skill's usage patterns are already clearly understood. It remains valuable even when working with an existing skill.
@@ -271,25 +265,17 @@ When creating a new skill from scratch, always run the `init_skill.py` script. T
 Usage:
 
 ```bash
-scripts/init_skill.py <skill-name> --path <output-directory> [--resources scripts,references,assets] [--examples]
-```
-
-Examples:
-
-```bash
-scripts/init_skill.py my-skill --path skills/public
-scripts/init_skill.py my-skill --path skills/public --resources scripts,references
-scripts/init_skill.py my-skill --path skills/public --resources scripts --examples
+scripts/init_skill.py <skill-name> --path <output-directory>
 ```
 
 The script:
 
 - Creates the skill directory at the specified path
 - Generates a SKILL.md template with proper frontmatter and TODO placeholders
-- Optionally creates resource directories based on `--resources`
-- Optionally adds example files when `--examples` is set
+- Creates example resource directories: `scripts/`, `references/`, and `assets/`
+- Adds example files in each directory that can be customized or deleted
 
-After initialization, customize the SKILL.md and add resources as needed. If you used `--examples`, replace or delete placeholder files.
+After initialization, customize or remove the generated SKILL.md and example files as needed.
 
 ### Step 4: Edit the Skill
 
@@ -310,7 +296,7 @@ To begin implementation, start with the reusable resources identified above: `sc
 
 Added scripts must be tested by actually running them to ensure there are no bugs and that the output matches what is expected. If there are many similar scripts, only a representative sample needs to be tested to ensure confidence that they all work while balancing time to completion.
 
-If you used `--examples`, delete any placeholder files that are not needed for the skill. Only create resource directories that are actually required.
+Any example files and directories not needed for the skill should be deleted. The initialization script creates example files in `scripts/`, `references/`, and `assets/` to demonstrate structure, but most skills won't need all of them.
 
 #### Update SKILL.md
 
@@ -320,7 +306,10 @@ If you used `--examples`, delete any placeholder files that are not needed for t
 
 Write the YAML frontmatter with `name` and `description`:
 
-- `name`: The skill name
+- `name`: The skill name.
+  - Must be kebab-case (lowercase letters, digits, and hyphens only).
+  - Cannot start or end with a hyphen, or contain consecutive hyphens.
+  - Maximum 64 characters.
 - `description`: This is the primary triggering mechanism for your skill, and helps the agent understand when to use the skill.
   - Include both what the Skill does and specific triggers/contexts for when to use it.
   - Include all "when to use" information here - Not in the body. The body is only loaded after triggering, so "When to Use This Skill" sections in the body are not helpful to the agent.

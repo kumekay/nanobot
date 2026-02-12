@@ -778,7 +778,13 @@ sudo systemctl start nanobot
 
 ### Update and Restart
 
-After `uv tool install --force .` from source:
+For a quick update from source that automatically reinstalls the tool and restarts the service (macOS/Linux):
+
+```bash
+bash install-and-restart.sh
+```
+
+Or manually after `uv tool install --force .` from source:
 
 ```bash
 # macOS
