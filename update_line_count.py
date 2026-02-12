@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Update README.md with current line counts."""
 
-import subprocess
 import re
+import subprocess
 
 
 def get_line_counts():
